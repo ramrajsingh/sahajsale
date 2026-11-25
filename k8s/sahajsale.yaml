@@ -1,0 +1,152 @@
+# SahajSale demo shop + Sidekick on Kubernetes (kind, k3d, minikube or a cloud cluster).
+#   docker build -t sahajsale:latest . && kind load docker-image sahajsale:latest   (or push to a registry and edit `image`)
+#   kubectl apply -f k8s/sahajsale.yaml
+#   kubectl -n sahajsale create secret generic sahajsale-secrets --from-env-file=.env   (optional: sponsor keys)
+#   kubectl -n sahajsale port-forward svc/sahajsale 8000:8000 &  kubectl -n sahajsale port-forward svc/storefront 8001:8000 &
+apiVersion: v1
+kind: Namespace
+metadata: {name: sahajsale}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: storefront, namespace: sahajsale, labels: {app: storefront}}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: storefront}}
+  template:
+    metadata:
+      labels: {app: storefront}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000", prometheus.io/path: /metrics}
+    spec:
+      containers:
+        - name: app
+          image: sahajsale:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8000}]
+          env:
+            - {name: ROLE, value: storefront}
+            - {name: CART_URL, value: "http://cart:8000"}
+            - {name: INVENTORY_URL, value: "http://inventory:8000"}
+            - {name: PAYMENTS_URL, value: "http://payments:8000"}
+            - {name: SIDEKICK_URL, value: "http://sahajsale:8000"}
+          envFrom: [{secretRef: {name: sahajsale-secrets, optional: true}}]
+          livenessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 5}
+          resources: {requests: {cpu: 100m, memory: 96Mi}, limits: {cpu: 500m, memory: 256Mi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: storefront, namespace: sahajsale}
+spec: {selector: {app: storefront}, ports: [{port: 8000, targetPort: 8000}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: cart, namespace: sahajsale, labels: {app: cart}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: cart}}
+  template:
+    metadata:
+      labels: {app: cart}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000", prometheus.io/path: /metrics}
+    spec:
+      containers:
+        - name: app
+          image: sahajsale:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8000}]
+          env:
+            - {name: ROLE, value: cart}
+            - {name: INVENTORY_URL, value: "http://inventory:8000"}
+          livenessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 5}
+          resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 300m, memory: 192Mi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: cart, namespace: sahajsale}
+spec: {selector: {app: cart}, ports: [{port: 8000, targetPort: 8000}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: inventory, namespace: sahajsale, labels: {app: inventory}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: inventory}}
+  template:
+    metadata:
+      labels: {app: inventory}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000", prometheus.io/path: /metrics}
+    spec:
+      containers:
+        - name: app
+          image: sahajsale:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8000}]
+          env:
+            - {name: ROLE, value: inventory}
+          livenessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 5}
+          # Deliberately modest limits: chaos.py's `oom` scenario pushes this past 256Mi for a real OOMKill.
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 256Mi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: inventory, namespace: sahajsale}
+spec: {selector: {app: inventory}, ports: [{port: 8000, targetPort: 8000}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: payments, namespace: sahajsale, labels: {app: payments}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: payments}}
+  template:
+    metadata:
+      labels: {app: payments}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000", prometheus.io/path: /metrics}
+    spec:
+      containers:
+        - name: app
+          image: sahajsale:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8000}]
+          env:
+            - {name: ROLE, value: payments}
+          livenessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 10}
+          readinessProbe: {httpGet: {path: /livez, port: 8000}, periodSeconds: 5}
+          resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 300m, memory: 192Mi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: payments, namespace: sahajsale}
+spec: {selector: {app: payments}, ports: [{port: 8000, targetPort: 8000}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: sahajsale, namespace: sahajsale, labels: {app: sahajsale}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: sahajsale}}
+  template:
+    metadata: {labels: {app: sahajsale}}
+    spec:
+      containers:
+        - name: app
+          image: sahajsale:latest
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8000}]
+          env:
+            - {name: ROLE, value: sidekick}
+            - {name: STOREFRONT_URL, value: "http://storefront:8000"}
+            - {name: CART_URL, value: "http://cart:8000"}
+            - {name: INVENTORY_URL, value: "http://inventory:8000"}
+            - {name: PAYMENTS_URL, value: "http://payments:8000"}
+          envFrom: [{secretRef: {name: sahajsale-secrets, optional: true}}]
+          livenessProbe: {httpGet: {path: /api/mock-flags, port: 8000}, periodSeconds: 10}
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {cpu: 500m, memory: 384Mi}}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: sahajsale, namespace: sahajsale}
+spec: {selector: {app: sahajsale}, ports: [{port: 8000, targetPort: 8000}]}

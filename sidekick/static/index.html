@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SahajSale</title>
+<style>
+:root{--bg:#fff8ec;--card:#fff;--ink:#2d1a12;--mute:#7b6558;--line:#efdcc4;--maroon:#7a1f2b;--gold:#e8a317;--ok:#1f7a4d;--bad:#b3261e;--warn:#b26a00;--okbg:#e4f4ec;--badbg:#fbe6e4;--warnbg:#fff0d6}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1410;--card:#272019;--ink:#f6e9da;--mute:#b9a393;--line:#3d3228;--maroon:#e06a78;--gold:#f0b43a;--ok:#5fd39a;--bad:#ff8b82;--warn:#f0b43a;--okbg:#17332a;--badbg:#3a1d1b;--warnbg:#3a2c12}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line)}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.3px}.logo small{display:block;font-size:12px;font-weight:500;color:var(--mute);letter-spacing:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--mute)}
+.chip.live{background:var(--okbg);color:var(--ok);border-color:transparent}.chip.mock{background:var(--warnbg);color:var(--warn);border-color:transparent}
+main{max-width:1180px;margin:0 auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card h2{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:700}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{border-radius:10px;padding:10px;border:1px solid var(--line);text-align:center}
+.tile b{display:block;font-size:12px;color:var(--mute);font-weight:600}.tile span{font-size:20px;font-weight:700}
+.tile.ok{background:var(--okbg);color:var(--ok)}.tile.bad{background:var(--badbg);color:var(--bad)}.tile.na{color:var(--mute)}
+.spark{display:flex;align-items:flex-end;gap:2px;height:34px;margin-top:10px}
+.spark i{flex:1;border-radius:2px;background:var(--ok);min-height:2px}.spark i.bad{background:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:600}
+button:hover{border-color:var(--maroon)}button.pri{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+button.go{background:var(--ok);color:#fff;border-color:var(--ok)}button.stop{background:var(--card);color:var(--bad);border-color:var(--bad)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.rec{background:var(--bad);color:#fff;border-color:var(--bad)}
+select,input[type=text]{font:inherit;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.steps{display:flex;gap:4px;margin:6px 0 14px}.steps div{flex:1;text-align:center;font-size:11px;padding:6px 2px;border-radius:7px;background:var(--line);color:var(--mute);font-weight:600}
+.steps div.done{background:var(--okbg);color:var(--ok)}.steps div.now{background:var(--maroon);color:#fff}.steps div.err{background:var(--badbg);color:var(--bad)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--badbg);color:var(--bad);font-weight:700;text-transform:uppercase}
+.badge.good{background:var(--okbg);color:var(--ok)}.badge.neutral{background:var(--warnbg);color:var(--warn)}
+.voice{background:var(--bg);border:1px dashed var(--line);border-radius:10px;padding:12px;margin:10px 0}
+.voice .local{font-size:18px;line-height:1.5}.voice .en{font-size:13px;color:var(--mute);margin-top:6px}
+ul.ev{margin:6px 0 0;padding-left:18px;font-size:13px;color:var(--mute)}
+.tl{max-height:190px;overflow:auto;font-size:12.5px;border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
+.tl div{padding:2px 0;color:var(--mute)}.tl time{color:var(--ink);font-variant-numeric:tabular-nums;margin-right:6px}
+.big{font-size:30px;font-weight:800}.mute{color:var(--mute);font-size:13px}
+.kv{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:14px}.kv:last-child{border:0}
+.clear{text-align:center;padding:26px 8px;color:var(--mute)}.clear .big{color:var(--ok)}
+.stack{display:flex;flex-direction:column;gap:16px}
+.msg{font-size:13px;margin-top:6px;min-height:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">सहज सेल · SahajSale<small>Your sale-day sidekick: it watches your store and talks to you in your language</small></div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<main>
+  <div class="stack">
+    <section class="card">
+      <h2>Store health (live)</h2>
+      <div class="tiles" id="tiles"></div>
+      <div class="spark" id="spark" title="last 20 test checkouts (red = failed or slow)"></div>
+      <div class="row" style="margin-top:12px;justify-content:space-between">
+        <span class="mute" id="loadline"></span>
+        <span class="mute" id="flagline"></span>
+      </div>
+    </section>
+
+    <section class="card" id="inc">
+      <h2>Incident</h2>
+      <div id="incbody"></div>
+    </section>
+
+    <section class="card">
+      <h2>After the sale · NudgeBee AI-FinOps</h2>
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div><div class="big" id="saving">–</div><div class="mute">estimated monthly saving</div><div class="mute" id="finsrc"></div></div>
+        <button id="finplay">▶ Hear summary</button>
+      </div>
+      <ul class="ev" id="finlist"></ul>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <h2>Voice language</h2>
+      <div class="row"><select id="lang"></select><span class="mute">Alert and summary are spoken in this language.</span></div>
+    </section>
+
+    <section class="card" id="demo">
+      <h2>Demo controls</h2>
+      <div class="row">
+        <button id="b-load">▶ Start festive traffic</button>
+        <button id="b-break" class="stop">💥 Break inventory</button>
+        <button id="b-heal">🩹 Heal everything</button>
+        <button id="b-reset">Reset numbers</button>
+      </div>
+      <div class="msg mute" id="demomsg"></div>
+      <div class="kv"><span>Orders completed</span><b id="ok">0</b></div>
+      <div class="kv"><span>Orders failed</span><b id="fail">0</b></div>
+      <div class="kv"><span>Revenue lost to failures</span><b id="lost">₹0</b></div>
+    </section>
+
+    <section class="card">
+      <h2>Flagsmith · A/B banner test</h2>
+      <div id="exp" class="mute">waiting for data…</div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const STEPS=['Detected','Investigated','Your approval','Fixing','Verified'];
+let S=null,loadOn=false,spoken=new Set(),busy=false;
+const rupee=n=>'₹'+Math.round(n||0).toLocaleString('en-IN');
+const hhmm=t=>new Date(t*1000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function api(path,opts){const r=await fetch(path,opts);let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(j.detail||r.status);return j}
+const post=(p,b)=>api(p,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b||{})});
+
+function speakText(text,lang){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang=lang;speechSynthesis.speak(u)}
+function play(inc,kind){const v=kind==='alert'?inc.voice:inc.summary_voice;if(!v)return;
+  if(v.has_audio){new Audio(`/api/incidents/${inc.id}/audio?kind=${kind}&t=${Date.now()}`).play().catch(()=>{})}
+  else speakText(v.text_local,v.lang)}
+
+function stepIndex(inc){const s=inc.status;
+  if(s==='investigating')return {i:1,err:false};if(s==='awaiting_approval')return {i:2,err:false};
+  if(s==='executing'||s==='verifying')return {i:3,err:false};if(s==='resolved')return {i:5,err:false};
+  return {i:2,err:true}}
+
+function render(){
+  if(!S)return;
+  // chips
+  const m=S.mode,ago=m.nudgebee_last_seen?Math.round(S.now-m.nudgebee_last_seen)+'s ago':'no events yet';
+  $('#chips').innerHTML=`<span class="chip ${m.voice==='sarvam'?'live':'mock'}">Sarvam voice: ${m.voice==='sarvam'?'live':'mock'}</span>
+  <span class="chip ${m.flags==='flagsmith'?'live':'mock'}">Flagsmith: ${m.flags==='flagsmith'?'live':'mock store'}</span>
+  <span class="chip ${m.nudgebee_last_seen?'live':''}">NudgeBee: ${ago}</span>`;
+  // lang
+  const sel=$('#lang');if(!sel.options.length){sel.innerHTML=Object.entries(S.langs).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}
+  if(document.activeElement!==sel)sel.value=S.lang;
+  // tiles
+  $('#tiles').innerHTML=['storefront','cart','inventory','payments'].map(n=>{const x=S.services[n];
+    const cls=x.ok===null?'na':x.ok?'ok':'bad';return `<div class="tile ${cls}"><b>${n==='storefront'?'checkout':n}</b><span>${x.ms===null?'–':x.ms+' ms'}</span></div>`}).join('');
+  const mx=Math.max(1500,...S.probes.map(p=>p.ms));
+  $('#spark').innerHTML=S.probes.map(p=>`<i class="${(!p.ok||p.ms>1200)?'bad':''}" style="height:${Math.max(6,Math.min(100,p.ms/mx*100))}%"></i>`).join('');
+  const sm=S.flags.sale_mode&&S.flags.sale_mode.enabled;
+  $('#flagline').textContent='Sale Mode flag: '+(sm?'ON ⚡':'off');
+  loadOn=S.load.on;$('#b-load').textContent=loadOn?'⏸ Stop festive traffic':'▶ Start festive traffic';
+  $('#loadline').textContent=loadOn?`Traffic: ${S.load.rps} orders/s`:'Traffic: off';
+  $('#ok').textContent=S.load.ok;$('#fail').textContent=S.load.fail;$('#lost').textContent=rupee(S.load.rev_lost);
+  $('#demo').style.display=m.demo_controls?'block':'none';
+  renderIncident();renderExp();
+}
+
+function renderIncident(){
+  const inc=S.incidents[0],el=$('#incbody');
+  if(!inc){el.innerHTML='<div class="clear"><div class="big">✓ All clear</div>SahajSale is watching checkout. If something breaks, you will hear about it here.</div>';return}
+  const {i,err}=stepIndex(inc),open=['investigating','awaiting_approval','executing','verifying'].includes(inc.status);
+  const steps=STEPS.map((s,k)=>`<div class="${err&&k===i-1?'err':k<i-(err?1:0)?'done':(k===i-(err?1:0)&&open)?'now':''}">${s}</div>`).join('');
+  const badge=inc.status==='resolved'?'<span class="badge good">resolved</span>':open?`<span class="badge">${esc(inc.severity)}</span>`:`<span class="badge neutral">${esc(inc.status.replace('_',' '))}</span>`;
+  let h=`<div class="row" style="justify-content:space-between"><b>${esc(inc.title)}</b>${badge}</div><div class="steps">${steps}</div>`;
+  h+=`<div class="mute">Why: ${esc(inc.rca.summary)}</div><div class="mute">Investigated by ${esc(inc.rca.source)}</div>`;
+  if(inc.rca.evidence&&inc.rca.evidence.length)h+='<ul class="ev">'+inc.rca.evidence.map(e=>`<li>${esc(e)}</li>`).join('')+'</ul>';
+  if(inc.voice&&inc.status==='awaiting_approval'){
+    h+=`<div class="voice"><div class="local">🔊 ${esc(inc.voice.text_local)}</div><div class="en">${esc(inc.voice.text_en)}</div>
+    <div class="mute" style="margin-top:6px">${esc(inc.voice.text_source)} · ${esc(inc.voice.audio_source)}</div>
+    <div class="row" style="margin-top:8px"><button id="a-play">▶ Play again</button></div></div>`;
+    h+=`<div class="row"><button class="go" id="a-yes">✓ Approve Sale Mode</button><button class="stop" id="a-no">✕ Cancel</button>
+    <button id="a-mic">🎤 Hold to answer by voice</button></div>
+    <div class="row" style="margin-top:8px"><input type="text" id="a-txt" placeholder="…or type: haan / नहीं / yes" size="26"><button id="a-send">Send</button></div>
+    <div class="msg" id="a-msg"></div>`;
+  }
+  if(inc.status==='resolved'&&inc.recovery){
+    h+=`<div class="voice"><div class="row" style="justify-content:space-between"><span><b>Fixed in ${inc.recovery.seconds_to_recover}s.</b> Checkout median ${inc.recovery.before.median_ms??'–'} ms → ${inc.recovery.after.median_ms} ms, success ${inc.recovery.before.success_pct??'–'}% → ${inc.recovery.after.success_pct}%.</span>
+    ${inc.summary_voice?'<button id="r-play">▶ Hear summary</button>':''}</div>${inc.summary_voice?`<div class="local" style="margin-top:8px">🔊 ${esc(inc.summary_voice.text_local)}</div>`:''}</div>`;
+  }
+  h+='<div class="tl">'+inc.timeline.map(t=>`<div><time>${hhmm(t.t)}</time>${esc(t.msg)}</div>`).join('')+'</div>';
+  // do not clobber the typed text or the mic while the owner is interacting
+  if(!busy&&!(document.activeElement&&document.activeElement.id==='a-txt')){
+    const typed=($('#a-txt')||{}).value||'';el.innerHTML=h;if($('#a-txt'))$('#a-txt').value=typed;wire(inc)}
+  if(inc.voice&&inc.status==='awaiting_approval'){const k=inc.id+inc.voice.lang+inc.voice.text_local.length;if(!spoken.has(k)){spoken.add(k);play(inc,'alert')}}
+  if(inc.status==='resolved'&&inc.summary_voice){const k=inc.id+'-done';if(!spoken.has(k)){spoken.add(k);play(inc,'resolved')}}
+}
+
+function wire(inc){
+  const g=id=>document.getElementById(id);
+  if(g('a-play'))g('a-play').onclick=()=>play(inc,'alert');
+  if(g('r-play'))g('r-play').onclick=()=>play(inc,'resolved');
+  if(g('a-yes'))g('a-yes').onclick=()=>act(inc,'approve');
+  if(g('a-no'))g('a-no').onclick=()=>act(inc,'reject');
+  if(g('a-send'))g('a-send').onclick=()=>sendTyped(inc);
+  if(g('a-txt'))g('a-txt').onkeydown=e=>{if(e.key==='Enter')sendTyped(inc)};
+  const mic=g('a-mic');if(mic){mic.onmousedown=mic.ontouchstart=e=>{e.preventDefault();startRec(inc,mic)};
+    mic.onmouseup=mic.onmouseleave=mic.ontouchend=()=>stopRec()}
+}
+function msg(t){const e=$('#a-msg');if(e)e.textContent=t}
+async function act(inc,what){try{await post(`/api/incidents/${inc.id}/${what}`);msg('Done.')}catch(e){msg(e.message)}tick()}
+async function sendTyped(inc){const t=$('#a-txt').value.trim();if(!t)return;
+  const fd=new FormData();fd.append('transcript',t);
+  try{const j=await api(`/api/incidents/${inc.id}/voice-approve`,{method:'POST',body:fd});
+    msg(j.intent==='unclear'?`I could not tell yes from no in "${j.transcript}". Please try again.`:`Heard "${j.transcript}" → ${j.intent}.`)}catch(e){msg(e.message)}tick()}
+
+// ---- microphone: record, convert to 16 kHz mono WAV in the browser, send to Sarvam STT via the server
+let rec=null,chunks=[],stream=null;
+async function startRec(inc,btn){if(rec)return;busy=true;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){msg('Microphone blocked. Type your reply instead.');busy=false;return}
+  chunks=[];rec=new MediaRecorder(stream);rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(chunks,{type:rec.mimeType});rec=null;btn.classList.remove('rec');
+    msg('Listening… transcribing…');
+    try{const wav=await toWav(blob);const fd=new FormData();fd.append('audio',wav,'reply.wav');
+      const j=await api(`/api/incidents/${inc.id}/voice-approve`,{method:'POST',body:fd});
+      msg(j.intent==='unclear'?`I heard "${j.transcript}" but could not tell yes from no. Try again.`:`Heard "${j.transcript}" → ${j.intent}.`)}
+    catch(e){msg(e.message)}busy=false;tick()};
+  rec.start();btn.classList.add('rec');btn.textContent='● Recording… release to send'}
+function stopRec(){if(rec&&rec.state==='recording')rec.stop()}
+async function toWav(blob){const ab=await blob.arrayBuffer();const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const buf=await ctx.decodeAudioData(ab);const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(buf.duration*16000)),16000);
+  const src=off.createBufferSource();src.buffer=buf;src.connect(off.destination);src.start();
+  const pcm=(await off.startRendering()).getChannelData(0);const out=new DataView(new ArrayBuffer(44+pcm.length*2));
+  const w=(o,s)=>[...s].forEach((c,i)=>out.setUint8(o+i,c.charCodeAt(0)));
+  w(0,'RIFF');out.setUint32(4,36+pcm.length*2,true);w(8,'WAVEfmt ');out.setUint32(16,16,true);out.setUint16(20,1,true);out.setUint16(22,1,true);
+  out.setUint32(24,16000,true);out.setUint32(28,32000,true);out.setUint16(32,2,true);out.setUint16(34,16,true);w(36,'data');out.setUint32(40,pcm.length*2,true);
+  pcm.forEach((v,i)=>out.setInt16(44+i*2,Math.max(-1,Math.min(1,v))*0x7fff,true));return new Blob([out],{type:'audio/wav'})}
+
+function renderExp(){const e=S.experiment||{};const rows=['A','B'].filter(k=>e[k]).map(k=>{const v=e[k].views,o=e[k].orders;
+  return `<div class="kv"><span>Banner ${k}</span><b>${o} orders / ${v} views${v?' · '+(100*o/v).toFixed(1)+'%':''}</b></div>`}).join('');
+  $('#exp').innerHTML=rows||'Open the store page to start collecting views.'}
+
+async function finops(){try{const f=await api('/api/finops');window._fin=f;
+  $('#saving').textContent=rupee(f.total_monthly_saving_inr);$('#finsrc').textContent='Source: '+f.source;
+  $('#finlist').innerHTML=f.findings.map(x=>`<li><b>${esc(x.resource)}</b>: ${esc(x.fix)} (saves ${rupee(x.monthly_saving_inr)}/mo)</li>`).join('')}catch(e){}}
+$('#finplay').onclick=async()=>{await finops();const f=window._fin;if(!f)return;
+  if(f.audio_id)new Audio(`/api/incidents/${f.audio_id}/audio?kind=finops`).play().catch(()=>{});else speakText(f.voice.text_local,f.voice.lang)};
+
+$('#lang').onchange=async e=>{await post('/api/lang',{lang:e.target.value,revoice:true});tick();finops()};
+$('#b-load').onclick=async()=>{await post('/api/demo/load',{on:!loadOn,rps:6});tick()};
+$('#b-break').onclick=async()=>{await post('/api/demo/break',{service:'inventory',latency_ms:3000,error_rate:0.1});$('#demomsg').textContent='Inventory is now slow (3 s) with 10% errors.'};
+$('#b-heal').onclick=async()=>{try{await post('/api/demo/heal');$('#demomsg').textContent='Faults cleared and Sale Mode turned off.'}catch(e){$('#demomsg').textContent=e.message}tick()};
+$('#b-reset').onclick=async()=>{await post('/api/demo/reset');tick()};
+
+async function tick(){try{S=await api('/api/state');render()}catch(e){}}
+tick();setInterval(tick,1500);finops();
+</script>
+</body>
+</html>

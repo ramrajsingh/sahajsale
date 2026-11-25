@@ -1,0 +1,36 @@
+# Whole stack on one machine:  docker compose up --build
+# dashboard http://localhost:8000   storefront http://localhost:8001
+x-shop: &shop
+  image: sahajsale:latest
+  environment: &shop-env
+    CART_URL: http://cart:8000
+    INVENTORY_URL: http://inventory:8000
+    PAYMENTS_URL: http://payments:8000
+    SIDEKICK_URL: http://sahajsale:8000
+  env_file:
+    - path: .env
+      required: false
+
+services:
+  sahajsale:
+    <<: *shop
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      <<: *shop-env
+      ROLE: sidekick
+      STOREFRONT_URL: http://storefront:8000
+  storefront:
+    <<: *shop
+    ports: ["8001:8000"]
+    environment: {<<: *shop-env, ROLE: storefront}
+  cart:
+    <<: *shop
+    environment: {<<: *shop-env, ROLE: cart}
+  inventory:
+    <<: *shop
+    mem_limit: 256m
+    environment: {<<: *shop-env, ROLE: inventory}
+  payments:
+    <<: *shop
+    environment: {<<: *shop-env, ROLE: payments}
