@@ -62,6 +62,14 @@ With no keys everything still runs. The dashboard shows chips for each integrati
 - **Flagsmith** (`FLAGSMITH_ENV_KEY` + `FLAGSMITH_ADMIN_KEY`, plus `FLAGSMITH_PROJECT_ID` or `FLAGSMITH_FEATURE_IDS`): create two features, `sale_mode` (boolean, off) and `urgency_banner_variant` (enabled, string value `A` or `B`). Keep change-request workflows **off** on that environment or the API write is refused.
 - **NudgeBee:** see `docs/NUDGEBEE.md`. Until it is connected, SahajSale's own monitor detects and does a quick probe-based RCA, and the dashboard says so ("Investigated by sahajsale-monitor") instead of claiming NudgeBee did it.
 
+## NudgeBee integration: what is real and what is simulated
+
+- **Built:** the Sidekick exposes `POST /api/webhooks/nudgebee` (title, severity, service, root_cause, evidence, callback_url), protected by `WEBHOOK_TOKEN` (`X-Webhook-Token` or Bearer), and calls back with `approved | rejected | failed` after the human decision. This is tested end to end (`scripts/e2e_test.py`) and the endpoint was exercised by hand with curl (token required; 401 without it, incident opened with it).
+- **Prepared:** a NudgeBee cloud account, the Kubernetes agent install command, and the Automation Builder plan (Event trigger, then an HTTP request step to the webhook above). Steps are in `docs/NUDGEBEE.md`.
+- **Not completed:** a live NudgeBee agent connected to a cluster. The local Kubernetes cluster (Docker Desktop on a 16 GB laptop, on event-venue Wi-Fi) did not finish starting before the deadline, so no real NudgeBee alert reached SahajSale.
+- **In the demo video:** the NudgeBee step is a **simulated webhook** (a curl call using NudgeBee's payload shape), labelled as such on screen and in the narration. Nothing in the video presents it as a live NudgeBee run.
+- The webhook contract is ours; a NudgeBee workflow HTTP step can call it as documented, but that wiring is unverified.
+
 ## Honest limitations
 
 - The Sarvam and Flagsmith calls were written against their public docs but could not be exercised from the build sandbox (no outbound access). Test them with real keys *before* the demo; the failure messages are explicit and appear in the incident timeline.
