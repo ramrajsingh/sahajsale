@@ -17,7 +17,7 @@ SARVAM_KEY = os.getenv("SARVAM_API_KEY", "")
 SARVAM_BASE = os.getenv("SARVAM_API_URL", "https://api.sarvam.ai").rstrip("/")
 TRANSLATE_MODEL = os.getenv("SARVAM_TRANSLATE_MODEL", "mayura:v1")
 TTS_MODEL = os.getenv("SARVAM_TTS_MODEL", "bulbul:v3")
-TTS_SPEAKER = os.getenv("SARVAM_TTS_SPEAKER", "anushka")
+TTS_SPEAKER = os.getenv("SARVAM_TTS_SPEAKER", "priya")  # must be a bulbul:v3 speaker (lowercase)
 STT_MODEL = os.getenv("SARVAM_STT_MODEL", "saaras:v3")
 
 LANGS = {
@@ -82,13 +82,14 @@ async def tts(client: httpx.AsyncClient, text: str, lang: str):
             headers=_sarvam_headers(),
             json={
                 "text": text[:2400],
-                "target_language_code": lang,
+                "language_code": lang,
                 "model": TTS_MODEL,
                 "speaker": TTS_SPEAKER,
             },
             timeout=30,
         )
-        r.raise_for_status()
+        if r.status_code >= 400:
+            raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
         return base64.b64decode(r.json()["audios"][0]), "audio/wav", None
     except Exception as exc:
         log.warning("Sarvam TTS failed: %s", exc)

@@ -85,6 +85,11 @@ else:
                  {"input": "Your store is slow.", "source_language_code": "en-IN", "target_language_code": "hi-IN", "model": os.environ.get("SARVAM_TRANSLATE_MODEL", "mayura:v1")})
     ok = st == 200 and isinstance(d, dict) and bool(d.get("translated_text"))
     report(ok, "key works (translated a test sentence to Hindi)", f"HTTP {st}" if st else str(d))
+    st, d = call("POST", "https://api.sarvam.ai/text-to-speech", {"api-subscription-key": key},
+                 {"text": "नमस्ते", "language_code": "hi-IN", "model": os.environ.get("SARVAM_TTS_MODEL", "bulbul:v3"),
+                  "speaker": os.environ.get("SARVAM_TTS_SPEAKER", "priya")})
+    ok = st == 200 and isinstance(d, dict) and bool(d.get("audios"))
+    report(ok, "voice works (spoke a test word in Hindi)", f"HTTP {st}: {str(d)[:200]}" if st else str(d))
 
 print()
 print("ALL GOOD" if not problems else f"{len(problems)} problem(s) to fix, see above")
